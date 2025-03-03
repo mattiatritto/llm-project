@@ -1,0 +1,14 @@
+# refer to src/sal/config.py for more options
+# export CONFIG=recipes/IBM-granite-2b-instruct/best_of_n.yaml
+# python scripts/test_time_compute.py $CONFIG
+
+model_path: ibm-granite/granite-3.1-2b-instruct
+# model_path: /home/MattiaTritto_STD/llm-project/src/merged_model
+approach: best_of_n
+dataset_name: /home/MattiaTritto_STD/llm-project/src/sql-dataset
+n: 1
+search_batch_size: 1
+sort_completed: true
+filter_duplicates: false
+# num_samples: 7         # REMOVE THIS LINE TO RUN ON THE WHOLE DATASET
+seed: 0

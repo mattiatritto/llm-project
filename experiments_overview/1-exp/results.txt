@@ -1,0 +1,35 @@
+First trial on dev set on the base model (not fine-tuned). Max tokens = 250.
+
+Apptainer> ./run_evaluation.sh
+starting to compare with knowledge for ex
+start calculate
+                     simple               moderate             challenging          total
+count                925                  464                  145                  1534
+======================================    ACCURACY    =====================================
+accuracy             9.19                 1.94                 1.38                 6.26
+===========================================================================================
+Finished evaluation
+starting to compare without knowledge for ex
+start calculate
+                     simple               moderate             challenging          total
+count                925                  464                  145                  1534
+======================================    ACCURACY    =====================================
+accuracy             3.24                 0.65                 0.69                 2.22
+===========================================================================================
+Finished evaluation
+starting to compare with knowledge for ves
+start calculate
+                     simple               moderate             challenging          total
+count                925                  464                  145                  1534
+=========================================    VES   ========================================
+ves                  9.37                 1.87                 1.38                 6.35
+===========================================================================================
+Finished evaluation
+starting to compare without knowledge for ves
+start calculate
+                     simple               moderate             challenging          total
+count                925                  464                  145                  1534
+=========================================    VES   ========================================
+ves                  3.33                 0.65                 0.69                 2.27
+===========================================================================================
+Finished evaluation

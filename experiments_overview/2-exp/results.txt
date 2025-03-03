@@ -1,0 +1,33 @@
+Apptainer> $EVALUATION
+Starting to compare with knowledge for EX
+start calculate
+                     simple               moderate             challenging          total
+count                925                  464                  145                  1534
+======================================    ACCURACY    =====================================
+accuracy             7.68                 0.65                 1.38                 4.95
+===========================================================================================
+Finished evaluation
+Starting to compare without knowledge for EX
+start calculate
+                     simple               moderate             challenging          total
+count                925                  464                  145                  1534
+======================================    ACCURACY    =====================================
+accuracy             2.81                 0.22                 2.07                 1.96
+===========================================================================================
+Finished evaluation
+Starting to compare with knowledge for VES
+start calculate
+                     simple               moderate             challenging          total
+count                925                  464                  145                  1534
+=========================================    VES   ========================================
+ves                  7.79                 0.53                 1.39                 4.98
+===========================================================================================
+Finished evaluation
+Starting to compare without knowledge for VES
+start calculate
+                     simple               moderate             challenging          total
+count                925                  464                  145                  1534
+=========================================    VES   ========================================
+ves                  2.99                 0.22                 2.11                 2.07
+===========================================================================================
+Finished evaluation

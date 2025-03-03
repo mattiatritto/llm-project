@@ -1,0 +1,13 @@
+# export CONFIG=/llm-project/config_test_time_scaling.yaml
+# python $TEST_TIME_COMPUTE $CONFIG
+
+model_path: ibm-granite/granite-3.1-2b-instruct
+approach: dvts
+dataset_name: /home/MattiaTritto_STD/llm-project/src/sql_dataset_combined
+n: 2
+beam_width: 1
+search_batch_size: 1
+sort_completed: true
+filter_duplicates: false
+# num_samples: None
+seed: 0

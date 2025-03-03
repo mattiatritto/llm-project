@@ -1,0 +1,4 @@
+Description of various experiments:
+
+1-exp: Inference test with 2b instruct without finetuning without saying to think step by step
+2-exp: Inference test with 2b instruct without finetuning with saying to think step by step and using search-and-learn framework

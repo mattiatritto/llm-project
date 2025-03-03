@@ -1,0 +1,73 @@
+BootStrap: docker
+From: python:3.11
+
+
+
+%environment
+    PYTHONUNBUFFERED=1
+    HF_HOME=/llm-project/hf_cache
+    HUGGINGFACE_HUB_CACHE=/llm-project/hf_cache
+    PYTHONPATH=/llm-project/search-and-learn/src:$PYTHONPATH
+    FINETUNING=/llm-project/src/finetuning.py
+    INFERENCE=/llm-project/src/inference.py
+    PREPROCESS=/llm-project/src/preprocess.py
+    EVALUATION=/llm-project/evaluation/run_evaluation.sh
+    EV=/llm-project/evaluation/results/evidence/predict.json
+    NO_EV=/llm-project/evaluation/results/no_evidence/predict.json
+    export PYTHONUNBUFFERED HF_HOME TRANSFORMERS_CACHE HUGGINGFACE_HUB_CACHE PYTHONPATH FINETUNING INFERENCE EVALUATION PREPROCESS EV NO_EV
+
+
+
+%files
+    requirements.txt /llm-project/requirements.txt
+
+
+
+%post
+    apt-get update && apt-get install -y \
+        git \
+        wget \
+        nano \
+        git-lfs \
+        && rm -rf /var/lib/apt/lists/*
+
+    mkdir -p /llm-project
+    mkdir -p /llm-project/hf_cache
+    chmod -R 777 /llm-project/hf_cache
+
+    mkdir -p /opt/miniconda3
+    wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O /opt/miniconda3/miniconda.sh
+    bash /opt/miniconda3/miniconda.sh -b -u -p /opt/miniconda3
+    rm /opt/miniconda3/miniconda.sh
+    /opt/miniconda3/bin/conda init bash
+    echo ". /opt/miniconda3/etc/profile.d/conda.sh" >> /etc/profile
+    echo "conda activate sal" >> /etc/profile
+    /opt/miniconda3/bin/conda create -n sal python=3.11 -y
+    . /opt/miniconda3/etc/profile.d/conda.sh
+    conda activate sal
+    pip install --no-cache-dir -r /llm-project/requirements.txt
+
+
+
+%runscript
+    . /opt/miniconda3/etc/profile.d/conda.sh
+    conda activate sal
+    exec /bin/bash
+
+
+
+# huggingface-cli login
+# apptainer build --fakeroot Apptainer.sif Apptainer.def
+# apptainer run --nv --bind $(pwd):/llm-project,/storage/shared_cache/shared_huggingface:/storage/shared_cache/shared_huggingface Apptainer.sif 
+# sshpass -p "" rsync -avz --exclude 'data' -e ssh /Users/mattiatritto/Desktop/llm-project  MattiaTritto_STD@10.74.0.185:/home/MattiaTritto_STD/
+# screen -S session
+# screen -r session
+# control+A+D
+# git remote add llm-project https://github.com/mattiatritto/llm-project.git
+# git remote set-url llm-project git@github.com:mattiatritto/llm-project.git
+# git add *
+# git commit -m “First commit”
+# git push llm-project main
+# git stash push -m "Bug fixes" 
+# git rm -r old_dir
+# git pull llm-project main 
