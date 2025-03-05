@@ -24,14 +24,16 @@ def decode_output(model, inputs, tokenizer, strategy):
     match strategy.lower():
         case "greedy":
             outputs = [model.generate(**inputs,max_new_tokens=MAX_TOKENS,do_sample=False)]
+            predictions = [tokenizer.decode(output[0, input_length:].tolist(), skip_special_tokens=True) for output in outputs]
         case "random_sampling":
             outputs = model.generate(**inputs,max_new_tokens=MAX_TOKENS, do_sample=True, temperature=0.7,top_k=50, top_p=0.95, num_return_sequences=N)
+            predictions = [tokenizer.decode(output[input_length:].tolist(), skip_special_tokens=True) for output in outputs]
         case "beam_search":
             outputs = model.generate(**inputs,max_new_tokens=MAX_TOKENS, num_beams=5,do_sample=False, early_stopping=True, num_return_sequences=N)
+            predictions = [tokenizer.decode(output[input_length:].tolist(), skip_special_tokens=True) for output in outputs]
         case _:
             raise ValueError("Invalid decoding strategy. Choose 'greedy', 'random_sampling', or 'beam_search'")
-        
-    predictions = [tokenizer.decode(output[0, input_length:].tolist(), skip_special_tokens=True) for output in outputs]
+    
     sqls = [extract_sql_query(sql) for sql in predictions]
     sqls = [normalize_sql(sql) for sql in sqls]
     return sqls

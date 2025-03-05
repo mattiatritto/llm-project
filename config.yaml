@@ -12,8 +12,8 @@ dataset:
 
 inference:
   model_name: "ibm-granite/granite-3.1-2b-instruct"
-  decoding_strategy: "greedy"
-  test_time_strategy: "none"
+  decoding_strategy: "random_sampling"
+  test_time_strategy: "majority_voting"
   n: 5
   test_query: "What is the name of the person with the highest salary?"
   num_queries: "ALL"

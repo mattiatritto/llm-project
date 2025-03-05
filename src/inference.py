@@ -88,4 +88,4 @@ dataset_without_evidence = preprocess(DATASET_PATH, TABLES_PATH, use_evidence=Fa
 
 
 predict(dataset_with_evidence, model, use_evidence=True, tokenizer=tokenizer)
-predict(dataset_without_evidence, model, use_evidence=False, tokenizer=tokenizer)
+# predict(dataset_without_evidence, model, use_evidence=False, tokenizer=tokenizer)
