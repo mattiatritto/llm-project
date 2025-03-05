@@ -48,8 +48,8 @@ class Config:
     dataset_end: int = None
     # num_samples: int = None
     num_samples: int = None
-    eval_file_evidence: str = "/home/MattiaTritto_STD/llm-project/evaluation/results/evidence/predict.json"
-    eval_file_no_evidence: str = "/home/MattiaTritto_STD/llm-project/evaluation/results/no_evidence/predict.json"
+    eval_file_evidence: str = "/home/MattiaTritto_STD/llm-project/evaluation/results/evidence/predict_dev.json"
+    eval_file_no_evidence: str = "/home/MattiaTritto_STD/llm-project/evaluation/results/no_evidence/predict_dev.json"
 
     # Chat template related options
     system_prompt: str = "You are a Text-to-SQL model assistant."

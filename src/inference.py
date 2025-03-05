@@ -5,7 +5,7 @@ from datasets import load_dataset, Dataset
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from preprocess import preprocess
 import yaml
-from test_time_scaling import decode_output
+from test_time_scaling import decode_output, test_time_scaling
 
 desired_dir = "/llm-project/src/"
 os.chdir(desired_dir)
@@ -21,6 +21,7 @@ MAX_TOKENS = config['model']['max_tokens']
 NUM_QUERIES = config['inference']['num_queries']
 DEVICE = config['inference']['device']
 DECODING_STRATEGY = config['inference']['decoding_strategy']
+TEST_TIME_STRATEGY = config['inference']['test_time_strategy']
 
 
 
@@ -33,7 +34,7 @@ def predict(dataset, model, use_evidence, tokenizer, num_queries=NUM_QUERIES):
     else:
         num_queries = min(num_queries, len(tokenized_datasets))
     
-    print(f"[4] Running inference on the first {num_queries} rows of the dataset (evidence = {use_evidence}, decoding = {DECODING_STRATEGY})...")
+    print(f"[4] Running inference on the first {num_queries} rows of the dataset (evidence = {use_evidence}, decoding = {DECODING_STRATEGY}, test time = {TEST_TIME_STRATEGY}) ...")
     queries = tokenized_datasets.select(range(num_queries))
 
     results = {}
@@ -44,16 +45,16 @@ def predict(dataset, model, use_evidence, tokenizer, num_queries=NUM_QUERIES):
         if i % 10 == 0:
             print("[Progress status]: Executed ", i, " queries")
         
-        inputs = tokenizer(problem, return_tensors="pt").to("cuda")
-        generated_sql = decode_output(model, inputs, db_id, tokenizer, strategy=DECODING_STRATEGY)
-        generated_sql = generated_sql.replace("\n", " ")
-        formatted_output = f"{generated_sql}\t----- bird -----\t{db_id}"
+        inputs = tokenizer(problem, return_tensors="pt").to(DEVICE)
+        sql_predictions = decode_output(model, inputs, tokenizer, strategy=DECODING_STRATEGY)
+        selected_sql = test_time_scaling(sql_predictions, db_id, strategy=TEST_TIME_STRATEGY)
+        formatted_output = f"{selected_sql}\t----- bird -----\t{db_id}"
         results[str(i)] = formatted_output
 
-    print(f"[5] Saving results to predict.json for eval (evidence = {use_evidence})...")
+    print(f"[5] Saving results to predict_dev.json for eval (evidence = {use_evidence})...")
 
-    EVAL_EVIDENCE_PATH = os.path.join(SCRIPT_DIR, "..", "evaluation", "results", "evidence", "predict.json")
-    EVAL_NO_EVIDENCE_PATH = os.path.join(SCRIPT_DIR, "..", "evaluation", "results", "no_evidence", "predict.json")
+    EVAL_EVIDENCE_PATH = os.path.join(SCRIPT_DIR, "..", "evaluation", "results", "evidence", "predict_dev.json")
+    EVAL_NO_EVIDENCE_PATH = os.path.join(SCRIPT_DIR, "..", "evaluation", "results", "no_evidence", "predict_dev.json")
 
     if use_evidence == True:
         with open(EVAL_EVIDENCE_PATH, "w") as f:

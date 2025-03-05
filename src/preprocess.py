@@ -28,8 +28,8 @@ def preprocess(dataset, tables, use_evidence):
         db_id = sample["db_id"]
         schema = schemas.get(db_id, {})
 
-        tables = schema.get("table_names", [])
-        columns = [f"{col[1]} ({schema['column_types'][i]})" for i, col in enumerate(schema.get("column_names", []))]
+        tables = schema.get("table_names_original", [])
+        columns = [f"{col[1]} ({schema['column_types'][i]})" for i, col in enumerate(schema.get("column_names_original", []))]
         #schema_info = f"Tables: {', '.join(tables)}\nColumns: {', '.join(columns)}"
         schema_info = generate_ddl_from_json(TABLES_PATH, db_id)
         prompt = f"[SCHEMA] {schema_info} "
@@ -50,7 +50,6 @@ def preprocess(dataset, tables, use_evidence):
         prompt += SYSTEM_PROMPT
         response = sample["SQL"]
         formatted_data.append({"problem": prompt, "answer": response, "db_id": db_id})
-    
     dataset = Dataset.from_list(formatted_data)
     if use_evidence:
         dataset.save_to_disk("./sql_dataset_evidence")
@@ -78,14 +77,14 @@ def generate_ddl_from_json(json_path, target_db_id):
     if not db_data:
         return f"Error: Database '{target_db_id}' not found"
     
-    table_names = db_data['table_names'] 
-    column_names = db_data['column_names']
+    table_names_original = db_data['table_names_original'] 
+    column_names_original = db_data['column_names_original']
     column_types = db_data['column_types']
     primary_keys = db_data['primary_keys']
     foreign_keys = db_data['foreign_keys']
     
     tables = {}
-    for i, (table_idx, col_name) in enumerate(column_names):
+    for i, (table_idx, col_name) in enumerate(column_names_original):
         if table_idx != -1: 
             if table_idx not in tables:
                 tables[table_idx] = []
@@ -110,13 +109,13 @@ def generate_ddl_from_json(json_path, target_db_id):
     ddl_statements = []
     
     for table_idx, columns in tables.items():
-        table_name = table_names[table_idx]
+        table_name = table_names_original[table_idx]
         ddl = f"CREATE TABLE \"{table_name}\" (\n"
         
         column_defs = []
         for i, col in enumerate(columns):
             col_def = f"    \"{col['name']}\" {col['type']}" 
-            col_idx = column_names.index([table_idx, col['name']])
+            col_idx = column_names_original.index([table_idx, col['name']])
             
             if col_idx in pk_set:
                 col_def += " PRIMARY KEY"
@@ -124,12 +123,12 @@ def generate_ddl_from_json(json_path, target_db_id):
             column_defs.append(col_def)
         
         for i, col in enumerate(columns):
-            col_idx = column_names.index([table_idx, col['name']])
+            col_idx = column_names_original.index([table_idx, col['name']])
             if col_idx in fk_dict:
                 ref_col_idx = fk_dict[col_idx]
-                ref_table_idx = next(c[0] for c in column_names if c[1] == column_names[ref_col_idx][1])
-                ref_table = table_names[ref_table_idx]
-                ref_col = column_names[ref_col_idx][1]
+                ref_table_idx = next(c[0] for c in column_names_original if c[1] == column_names_original[ref_col_idx][1])
+                ref_table = table_names_original[ref_table_idx]
+                ref_col = column_names_original[ref_col_idx][1]
                 fk_def = f"    FOREIGN KEY (\"{col['name']}\") REFERENCES \"{ref_table}\"(\"{ref_col}\")"
                 column_defs.append(fk_def)
         

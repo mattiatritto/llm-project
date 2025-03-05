@@ -78,7 +78,7 @@ dataset = preprocess(DATASET_PATH, TABLES_PATH, use_evidence=True)
 
 
 print("[6] Tokenizing dataset...")
-tokenized_datasets = dataset.map(lambda x: tokenize_function(x, tokenizer), batched=True, remove_columns=dataset.column_names)
+tokenized_datasets = dataset.map(lambda x: tokenize_function(x, tokenizer), batched=True, remove_columns=dataset.column_names_original)
 
 
 

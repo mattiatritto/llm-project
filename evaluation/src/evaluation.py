@@ -13,8 +13,10 @@ def load_json(dir):
 def result_callback(result):
     exec_result.append(result)
 
+
 def execute_sql(predicted_sql,ground_truth, db_path):
     conn = sqlite3.connect(db_path)
+    # Connect to the database
     cursor = conn.cursor()
     cursor.execute(predicted_sql)
     predicted_res = cursor.fetchall()
@@ -24,6 +26,8 @@ def execute_sql(predicted_sql,ground_truth, db_path):
     if set(predicted_res) == set(ground_truth_res):
         res = 1
     return res
+
+
 
 def execute_model(predicted_sql,ground_truth, db_place, idx, meta_time_out):
     try:
@@ -35,10 +39,14 @@ def execute_model(predicted_sql,ground_truth, db_place, idx, meta_time_out):
         result = [(f'timeout',)]
         res = 0
     except Exception as e:
-        result = [(f'error',)]
+        result = [(f'error',)]  # possibly len(query) > 512 or not executable
         res = 0
+    # print(result)
+    # result = str(set([ret[0] for ret in result]))
     result = {'sql_idx': idx, 'res': res}
+    # print(result)
     return result
+
 
 def package_sqls(sql_path, db_root_path, mode='gpt', data_mode='dev'):
     clean_sqls = []
@@ -56,6 +64,7 @@ def package_sqls(sql_path, db_root_path, mode='gpt', data_mode='dev'):
     elif mode == 'gt':
         sqls = open(sql_path + data_mode + '.sql')
         sql_txt = sqls.readlines()
+        # sql_txt = [sql.split('\t')[0] for sql in sql_txt]
         for idx, sql_str in enumerate(sql_txt):
             sql, db_name = sql_str.strip().split('\t')
             clean_sqls.append(sql)
@@ -98,6 +107,8 @@ def compute_acc_by_diff(exec_results,diff_json_path):
     count_lists = [len(simple_results), len(moderate_results), len(challenging_results), num_queries]
     return simple_acc * 100, moderate_acc * 100, challenging_acc * 100, all_acc * 100, count_lists
 
+
+
 def print_data(score_lists,count_lists):
     levels = ['simple', 'moderate', 'challenging', 'total']
     print("{:20} {:20} {:20} {:20} {:20}".format("", *levels))
@@ -105,6 +116,7 @@ def print_data(score_lists,count_lists):
 
     print('======================================    ACCURACY    =====================================')
     print("{:20} {:<20.2f} {:<20.2f} {:<20.2f} {:<20.2f}".format('accuracy', *score_lists))
+
 
 if __name__ == '__main__':
     args_parser = argparse.ArgumentParser()
@@ -123,6 +135,7 @@ if __name__ == '__main__':
 
     pred_queries, db_paths = package_sqls(args.predicted_sql_path, args.db_root_path, mode=args.mode_predict,
                                           data_mode=args.data_mode)
+    # generate gt sqls:
     gt_queries, db_paths_gt = package_sqls(args.ground_truth_path, args.db_root_path, mode='gt',
                                            data_mode=args.data_mode)
 
@@ -130,10 +143,11 @@ if __name__ == '__main__':
     run_sqls_parallel(query_pairs, db_places=db_paths, num_cpus=args.num_cpus, meta_time_out=args.meta_time_out)
     exec_result = sort_results(exec_result)
     
-    print('Start calculate')
+    print('start calculate')
     simple_acc, moderate_acc, challenging_acc, acc, count_lists = \
         compute_acc_by_diff(exec_result,args.diff_json_path)
     score_lists = [simple_acc, moderate_acc, challenging_acc, acc]
     print_data(score_lists,count_lists)
     print('===========================================================================================')
     print("Finished evaluation")
+    

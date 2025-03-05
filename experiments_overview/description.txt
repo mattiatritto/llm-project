@@ -2,3 +2,7 @@ Description of various experiments:
 
 1-exp: Inference test with 2b instruct without finetuning without saying to think step by step
 2-exp: Inference test with 2b instruct without finetuning with saying to think step by step and using search-and-learn framework
+3-exp: Inference test with 2b instruct without finetuning with saying to think step by step ans adding DDL in prompt
+4-exp: Inference test with 2b instruct without finetuning with saying to think step by step ans adding DDL in prompt, and using original names for tables and columns
+5-exp: Inference test with 2b instruct without finetuning with saying to think step by step ans adding DDL in prompt, and using original names for tables and columns, suing also test time best of n = 5
+6-exp: Inference test with 2b instruct without finetuning with saying to think step by step ans adding DDL in prompt, and using original names for tables and columns, suing also test time majority voting = 5
