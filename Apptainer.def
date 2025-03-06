@@ -12,9 +12,10 @@ From: python:3.11
     INFERENCE=/llm-project/src/inference.py
     PREPROCESS=/llm-project/src/preprocess.py
     EVALUATION=/llm-project/evaluation/run_evaluation.sh
-    EV=/llm-project/evaluation/results/evidence/predict_dev.json
-    NO_EV=/llm-project/evaluation/results/no_evidence/predict_dev.json
-    export PYTHONUNBUFFERED HF_HOME TRANSFORMERS_CACHE HUGGINGFACE_HUB_CACHE PYTHONPATH FINETUNING INFERENCE EVALUATION PREPROCESS EV NO_EV
+    QUERIES_EV=/llm-project/evaluation/results/evidence/predict_dev.json
+    QUERIES_NO_EV=/llm-project/evaluation/results/no_evidence/predict_dev.json
+    RUN_EXPERIMENT=/llm-project/run_experiment.sh
+    export PYTHONUNBUFFERED HF_HOME TRANSFORMERS_CACHE HUGGINGFACE_HUB_CACHE PYTHONPATH FINETUNING INFERENCE EVALUATION PREPROCESS QUERIES_EV QUERIES_NO_EV RUN_EXPERIMENT
 
 
 

@@ -52,7 +52,7 @@ Follow these steps to set up and run the project:
    ```
 5. **Run evaluation:**
    ```sh
-   python $EVALUATION
+   $EVALUATION
    ```
 
 ## Contributing

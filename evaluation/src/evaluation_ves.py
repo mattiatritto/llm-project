@@ -24,7 +24,6 @@ def clean_abnormal(input):
     return processed_list
 
 def execute_sql(sql, db_path):
-    breakpoint()
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     start_time = time.time()
