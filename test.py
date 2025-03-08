@@ -83,7 +83,7 @@ def run_when_gpu_free(script_path, min_free_percent):
                 break
         else:
             print(f"Insufficient free memory ({free_percent:.2f}% < {min_free_percent}%). Waiting...")
-            time.sleep(60)
+            time.sleep(60) 
 
 if __name__ == "__main__":
     # Initialize NVML before using any GPU-related functions
