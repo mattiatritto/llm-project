@@ -1,0 +1,16 @@
+Starting to compare with knowledge for EX
+start calculate
+                     simple               moderate             challenging          total
+count                925                  464                  145                  1534
+======================================    ACCURACY    =====================================
+accuracy             23.89                10.56                7.59                 18.32
+===========================================================================================
+Finished evaluation
+Starting to compare with knowledge for VES
+Start calculate
+                     simple               moderate             challenging          total
+count                925                  464                  145                  1534
+=========================================    VES   ========================================
+ves                  23.40                10.82                8.61                 18.20
+===========================================================================================
+Finished evaluation

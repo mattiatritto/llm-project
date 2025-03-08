@@ -3,7 +3,22 @@ import time
 import subprocess
 import sys
 
+def initialize_nvml():
+    """Initialize the NVML library."""
+    try:
+        pynvml.nvmlInit()
+        print("NVML initialized successfully.")
+    except pynvml.NVMLError as e:
+        print(f"Failed to initialize NVML: {e}")
+        sys.exit(1)
 
+def shutdown_nvml():
+    """Shutdown the NVML library."""
+    try:
+        pynvml.nvmlShutdown()
+        print("NVML shutdown successfully.")
+    except pynvml.NVMLError as e:
+        print(f"Failed to shutdown NVML: {e}")
 
 def get_gpu_memory_usage():
     handle = pynvml.nvmlDeviceGetHandleByIndex(0)
@@ -20,8 +35,6 @@ def get_gpu_memory_usage():
     print("Free GPU memory (%):", free_percent)
     
     return free_percent
-        
-
 
 def run_when_gpu_free(script_path, min_free_percent):
     print(f"Monitoring GPU memory... Waiting for {min_free_percent}% free memory")
@@ -33,7 +46,6 @@ def run_when_gpu_free(script_path, min_free_percent):
         if free_percent >= min_free_percent:
             print(f"GPU memory requirement met ({free_percent:.2f}% free). Running script '{script_path}'...")
             try:
-
                 process = subprocess.Popen(['python', script_path],
                                         stdout=subprocess.PIPE,
                                         stderr=subprocess.PIPE,
@@ -71,13 +83,21 @@ def run_when_gpu_free(script_path, min_free_percent):
                 break
         else:
             print(f"Insufficient free memory ({free_percent:.2f}% < {min_free_percent}%). Waiting...")
-            time.sleep(5) 
+            time.sleep(60)
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print("Please provide the script path as an argument")
-        print("Usage: python this_script.py your_script.py")
-        sys.exit(1)
+    # Initialize NVML before using any GPU-related functions
+    initialize_nvml()
+
+    try:
+        if len(sys.argv) < 2:
+            print("Please provide the script path as an argument")
+            print("Usage: python this_script.py your_script.py")
+            sys.exit(1)
         
-    target_script = sys.argv[1]
-    run_when_gpu_free(target_script, min_free_percent=50)
+        target_script = sys.argv[1]
+        run_when_gpu_free(target_script, min_free_percent=55)
+    
+    finally:
+        # Ensure NVML is properly shut down when the script exits
+        shutdown_nvml()

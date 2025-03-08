@@ -66,8 +66,8 @@ From: python:3.11
 # control+A+D
 # git remote add llm-project https://github.com/mattiatritto/llm-project.git
 # git remote set-url llm-project git@github.com:mattiatritto/llm-project.git
-# git add *
-# git commit -m “First commit”
+# git add -A
+# git commit -a -m “First commit”
 # git push llm-project main
 # git stash push -m "Bug fixes" 
 # git rm -r old_dir
