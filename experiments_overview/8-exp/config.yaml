@@ -13,8 +13,8 @@ dataset:
 inference:
   model_name: "ibm-granite/granite-3.1-2b-instruct"
   decoding_strategy: "beam_search"
-  test_time_strategy: "best_of_n"
-  n: 3
+  test_time_strategy: "none"
+  n: 1
   test_query: "What is the name of the person with the highest salary?"
   num_queries: "ALL"
   device: "cuda"
