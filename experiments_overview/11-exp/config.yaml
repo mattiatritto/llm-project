@@ -1,0 +1,24 @@
+model:
+  max_tokens: 1024
+
+system_prompt: "Given the above [SCHEMA] of a database and a question [QUESTION], translate the question into a valid SQLite statement, arriving at the final solution by decomposing the reasoning in increasingly complex building blocks. Explain each step of the SQL building process thinking step by step. Format the output using the Markdown language. Only the final SQL statement must be enclosed between [SQL] and [/SQL]. Output the query as a single continuous line with no newlines (\n), tabs (\t), or unnecessary spaces, like this: This in an example of how the final output should look like: [SQL] SELECT MAX(popularity) AS max_popularity FROM prof; [/SQL]"
+
+dataset:
+  dataset_training_path: "../data/train/train.json"
+  tables_training_path: "../data/train/train_tables.json"
+  dataset_dev_path: "../data/dev_20240627/dev.json"
+  tables_dev_path: "../data/dev_20240627/dev_tables.json"
+  db_sqlite: '../data/dev_20240627/dev_databases/'
+
+inference:
+  model_name: "deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B"
+  decoding_strategy: "greedy"
+  test_time_strategy: "none"
+  n: 1
+  test_query: "What is the name of the person with the highest salary?"
+  num_queries: "ALL"
+  device: "cuda"
+  
+finetuning:
+  model_name: "ibm-granite/granite-3.1-2b-instruct"
+  epochs: 1
