@@ -61,6 +61,7 @@ def test_time_scaling(sql_predictions, db_id, count_gemini_api, question_evidenc
         case "none":
             return sql_predictions[0], count_gemini_api
         
+        
 
 
         case "best_of_n":
@@ -72,15 +73,11 @@ def test_time_scaling(sql_predictions, db_id, count_gemini_api, question_evidenc
 
         case "majority_voting":
 
-            TABLES_DEV_PATH = config['dataset']['db_sqlite']
-            db_path = os.path.join(TABLES_DEV_PATH, f"{db_id}", f"{db_id}.sqlite")
-            N = config['inference']['n']
-
             successful_sqls = []
             for sql in sql_predictions:
-                result = execute_query(sql, db_path)
+                result = execute_query(sql, db_id)
                 success = result["connection_successful"]
-                rows = result["number_of_rows"]
+                rows = result["data"]
                 if success:
                     hashable_rows = tuple(tuple(row) if isinstance(row, list) else row for row in rows)
                     successful_sqls.append((sql, hashable_rows))
@@ -104,17 +101,16 @@ def test_time_scaling(sql_predictions, db_id, count_gemini_api, question_evidenc
 
             results = [execute_query(sql, db_id) for sql in sql_predictions]
             scores = [result['score'] for result in results]
-                
             if all(score == 0 for score in scores):
                 print(f"None of the queries were successful. Picking one random.")
                 random_result = random.choice(results)
                 return random_result['query'], count_gemini_api
             elif all(score == 0.5 for score in scores):
-                print(f"All queries were valid but returned 0 rows. Picking that one.")
+                print(f"All queries were valid but returned 0 rows. Picking one of them.")
                 random_result = random.choice(results)
                 return random_result['query'], count_gemini_api
-            elif scores.count(0.5) == 1 and scores.count(1) == 0:
-                print(f"One query was valid but returned 0 rows. Picking that one.")
+            elif scores.count(0.5) >= 1 and scores.count(1) == 0:
+                print(f"At least one query was valid but returned 0 rows. Picking that one.")
                 candidate = next(result for result in results if result['score'] == 0.5)
                 return candidate['query'], count_gemini_api
             elif scores.count(1) == 1:
@@ -129,7 +125,7 @@ def test_time_scaling(sql_predictions, db_id, count_gemini_api, question_evidenc
                 for i, query in enumerate(candidates, start=1):
                     queryText += f"{i}: {query}\n"
 
-
+                ddl = generate_ddl_from_json(target_db_id=db_id)
                 prompt =f"""
 You are an expert SQL assistant tasked with choosing the best query among a list of queries. I will provide you with:
 1. A list of SQL queries numbered.
@@ -149,7 +145,7 @@ Here are the details:
 **SQL Queries:**
 {queryText}
 
-**User neeed:**
+**User need:**
 {question_evidence}
 
 **Database DDL:**
@@ -158,13 +154,14 @@ Here are the details:
 
                 response, count_gemini_api = generate_gemini(count_gemini_api, prompt=prompt)
                 match = re.search(r'\[CHOICE\]\s*(\d+)\s*\[/CHOICE\]', response)
+                number = 0
                 if match:
                     number = int(match.group(1))
                     print(f"Extracted number: {number}")
                 else:
                     print("No choice found")
 
-                return candidates[match-1], count_gemini_api
+                return candidates[number-1], count_gemini_api
 
 
 
@@ -191,7 +188,7 @@ You are an expert SQL assistant tasked with fixing a broken SQL query. I will pr
 1. A SQL query that is failing.
 2. The error message generated when the query was executed.
 3. The DDL (Data Definition Language) of the database, which describes the schema and structure of the tables involved.
-4. User neeed.
+4. User need.
 
 Your job is to:
 - Analyze the provided SQL query, the error message, and the database DDL.
@@ -210,13 +207,13 @@ Here are the details:
 **Database DDL:**
 {ddl}
 
-**User neeed:**
+**User need:**
 {question_evidence}
-
 """
                     sql_predictions, count_gemini_api = generate_gemini(count_gemini_api, prompt=prompt)
                     sql_predictions = [sql_predictions]
                     sql_predictions = [extract_sql_query(sql) for sql in sql_predictions]
+                    sql_predictions = [extract_sql_markdown(sql) for sql in sql_predictions]
                 
                 elif 0.5 in scores:
                     print(f"[Iteration {iteration+1}]: One query was successful, but has returned 0 rows. Trying to adjust it...")
@@ -244,12 +241,13 @@ Here are the details:
 **Database DDL:**
 {ddl}
 
-**User neeed:**
+**User need:**
 {question_evidence}
 """
                     sql_predictions, count_gemini_api = generate_gemini(count_gemini_api, prompt=prompt)
                     sql_predictions = [sql_predictions]
                     sql_predictions = [extract_sql_query(sql) for sql in sql_predictions]
+                    sql_predictions = [extract_sql_markdown(sql) for sql in sql_predictions]
                 
                 elif 1.0 in scores:
                     print(f"[Iteration {iteration+1}]: One query was successful and it return some rows. Checking if it is the correct one...")
@@ -264,7 +262,7 @@ You are an expert SQL assistant tasked with fixing a broken SQL query. I will pr
 1. A SQL query.
 2. Results coming from the execution of this SQL query (only the first 5 rows).
 3. The DDL (Data Definition Language) of the database, which describes the schema and structure of the tables involved.
-4. User neeed.
+4. User need.
 
 Your job is to:
 - Analyze the provided SQL query and the database DDL.
@@ -282,12 +280,13 @@ Here are the details:
 **Database DDL:**
 {ddl}
 
-**User neeed:**
+**User need:**
 {question_evidence}
 """
                     sql_predictions, count_gemini_api = generate_gemini(count_gemini_api, prompt=prompt)
                     sql_predictions = [sql_predictions]
                     sql_predictions = [extract_sql_query(sql) for sql in sql_predictions]
+                    sql_predictions = [extract_sql_markdown(sql) for sql in sql_predictions]
                     final_result = sql_predictions[0]
                 
                 iteration += 1
@@ -297,7 +296,6 @@ Here are the details:
             else:
                 return sql_predictions[0], count_gemini_api
 
-    
 
 def execute_query(query, db_id):
 
@@ -349,6 +347,15 @@ def extract_sql_query(sql_query):
 
 
 
+def extract_sql_markdown(sql_query):
+    if not isinstance(sql_query, str):
+        return None
+        
+    match = re.search(r'```sql\s*(.*?)\s*```', sql_query, re.DOTALL)
+    return match.group(1) if match else sql_query
+
+
+
 def generate_gemini(count_gemini_api, prompt=""):
 
     api_keys = [
@@ -375,7 +382,7 @@ def generate_gemini(count_gemini_api, prompt=""):
 
     client = genai.Client(api_key=GEMINI_KEY)
     contents = [types.Content(role="user", parts=[types.Part.from_text(text=prompt),],),]
-    generate_content_config = types.GenerateContentConfig(temperature=1, top_p=0.95, top_k=40, max_output_tokens=MAX_TOKENS, response_mime_type="text/plain",)
+    generate_content_config = types.GenerateContentConfig(temperature=0, top_p=0.95, top_k=40, max_output_tokens=MAX_TOKENS, response_mime_type="text/plain",)
 
     response = ""
     for chunk in client.models.generate_content_stream(model=MODEL_NAME, contents=contents, config=generate_content_config,):
