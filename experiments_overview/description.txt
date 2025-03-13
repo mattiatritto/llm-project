@@ -1,5 +1,4 @@
 Description of various experiments:
-
 1-exp: Inference test with 2b instruct without finetuning without saying to think step by step
 2-exp: Inference test with 2b instruct without finetuning with saying to think step by step and using search-and-learn framework
 3-exp: Inference test with 2b instruct without finetuning with saying to think step by step and adding DDL in prompt
@@ -8,10 +7,14 @@ Description of various experiments:
 4.1-exp: Inference test with 2b base without finetuning with saying to think step by step and adding DDL in prompt, and using original names for tables and columns. To compare with 4.
 5.1-exp: Inference test with 2b instruct without finetuning with saying to think step by step and adding DDL in prompt, and using original names for tables and columns, using also test time best of n = 3. To compare with 5
 6.1-exp: Inference test with 2b instruct without finetuning with saying to think step by step and adding DDL in prompt, and using original names for tables and columns, using also test time majority voting = 3. To compare with 6
-(to-do failed) 6-exp: Inference test with 2b instruct without finetuning with saying to think step by step and adding DDL in prompt, and using original names for tables and columns, using also test time majority voting = 5
 7-exp: Inference test with 8b instruct without finetuning with saying to think step by step and adding DDL in prompt, and using original names for tables and columns
 8-exp: Inference test with 2b instruct without finetuning with saying to think step by step and adding DDL in prompt, and using original names for tables and columns, using beam_search
-(to-do failed): 9-exp: Inference test with 2b instruct without finetuning with saying to think step by step and adding DDL in prompt, and using original names for tables and columns, using also test time best of n = 3 and using beam search
 10-exp: Inference test with 8B DeepSeeek LLama without finetuning with saying to think step by step and adding DDL in prompt, and using original names for tables and columns
 11-exp: Inference test with 1.5B DeepSeeek QWen without finetuning with saying to think step by step and adding DDL in prompt, and using original names for tables and columns
 12-exp: Inference test with 2b instruct without finetuning with saying to think step by step and adding DDL in prompt, and using original names for tables and columns, using random sampling, best of n llm n = 2
+(to-do): 13-exp: Inference test with 2b instruct without finetuning with saying to think step by step and adding DDL in prompt, and using original names for tables and columns, using also test time majority voting = 5
+(to-do): 14-exp: Inference test with 2b instruct without finetuning with saying to think step by step and adding DDL in prompt, and using original names for tables and columns, using also test time best of n = 3 and using beam search
+(to-do): 15-exp: Inference test with 2b instruct without finetuning with saying to think step by step and adding DDL in prompt, and using original names for tables and columns, using also test time majority voting = 3 and using beam search
+(to-do): 16-exp: Inference test with 2b instruct without finetuning with saying to think step by step and adding DDL in prompt, and using original names for tables and columns, using also test time best of n = 3 and using LLM judge
+(to-do): 17-exp: Inference test with 2b instruct without finetuning with saying to think step by step and adding DDL in prompt, and using original names for tables and columns, using also test time best of n = 3 and using self refinement
+
