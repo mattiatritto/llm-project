@@ -3,7 +3,7 @@ start calculate
                      simple               moderate             challenging          total
 count                925                  464                  145                  1534
 ======================================    ACCURACY    =====================================
-accuracy             2.27                 0.00                 0.69                 1.43
+accuracy             21.41                6.68                 3.45                 15.25
 ===========================================================================================
 Finished evaluation
 Starting to compare with knowledge for VES
@@ -11,6 +11,6 @@ Start calculate
                      simple               moderate             challenging          total
 count                925                  464                  145                  1534
 =========================================    VES   ========================================
-ves                  2.33                 0.00                 0.69                 1.47
+ves                  21.98                6.39                 3.93                 15.56
 ===========================================================================================
 Finished evaluation

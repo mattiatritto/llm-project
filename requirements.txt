@@ -16,3 +16,4 @@ transformers>=4.47.0
 fastapi
 hf_transfer
 sqlparse
+google-genai

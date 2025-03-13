@@ -6,6 +6,7 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 from preprocess import preprocess
 import yaml
 from test_time_scaling import decode_output, test_time_scaling
+import gc
 
 desired_dir = "/llm-project/src/"
 os.chdir(desired_dir)
@@ -23,8 +24,6 @@ DEVICE = config['inference']['device']
 DECODING_STRATEGY = config['inference']['decoding_strategy']
 TEST_TIME_STRATEGY = config['inference']['test_time_strategy']
 
-
-
 def predict(dataset, model, use_evidence, tokenizer, num_queries=NUM_QUERIES):
     print(f"[3] Tokenizing dataset (evidence = {use_evidence})...")
     tokenized_datasets = dataset.map(lambda x: tokenize_function(x, tokenizer), batched=True)
@@ -37,19 +36,24 @@ def predict(dataset, model, use_evidence, tokenizer, num_queries=NUM_QUERIES):
     print(f"[4] Running inference on the first {num_queries} rows of the dataset (evidence = {use_evidence}, decoding = {DECODING_STRATEGY}, test time = {TEST_TIME_STRATEGY}) ...")
     queries = tokenized_datasets.select(range(num_queries))
 
+    count_gemini_api = 0
     results = {}
     for i, query in enumerate(queries):
+        
         problem = query["problem"]
         db_id = query["db_id"]
 
-        if i % 10 == 0:
+        if i % 1 == 0:
             print("[Progress status]: Executed ", i, " queries")
         
         inputs = tokenizer(problem, return_tensors="pt").to(DEVICE)
         sql_predictions = decode_output(model, inputs, tokenizer, strategy=DECODING_STRATEGY)
-        selected_sql = test_time_scaling(sql_predictions, db_id, strategy=TEST_TIME_STRATEGY)
+        selected_sql, count_gemini_api  = test_time_scaling(sql_predictions, db_id, count_gemini_api, query["question_evidence"], strategy=TEST_TIME_STRATEGY)
+
         formatted_output = f"{selected_sql}\t----- bird -----\t{db_id}"
         results[str(i)] = formatted_output
+        torch.cuda.empty_cache()
+        gc.collect()
 
     print(f"[5] Saving results to predict_dev.json for eval (evidence = {use_evidence})...")
 
@@ -88,4 +92,3 @@ dataset_without_evidence = preprocess(DATASET_PATH, TABLES_PATH, use_evidence=Fa
 
 
 predict(dataset_with_evidence, model, use_evidence=True, tokenizer=tokenizer)
-# predict(dataset_without_evidence, model, use_evidence=False, tokenizer=tokenizer)

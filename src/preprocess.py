@@ -15,6 +15,7 @@ TABLES_PATH = os.path.join(SCRIPT_DIR, config['dataset']['tables_dev_path'])
 SYSTEM_PROMPT = os.path.join(SCRIPT_DIR, config['system_prompt'])
 
 
+
 def preprocess(dataset, tables, use_evidence):
 
     with open(dataset, "r") as f:
@@ -25,12 +26,12 @@ def preprocess(dataset, tables, use_evidence):
 
     formatted_data = []
     for sample in data:
+
         db_id = sample["db_id"]
         schema = schemas.get(db_id, {})
 
         tables = schema.get("table_names_original", [])
         columns = [f"{col[1]} ({schema['column_types'][i]})" for i, col in enumerate(schema.get("column_names_original", []))]
-        #schema_info = f"Tables: {', '.join(tables)}\nColumns: {', '.join(columns)}"
         schema_info = generate_ddl_from_json(TABLES_PATH, db_id)
         prompt = f"[SCHEMA] {schema_info} "
 
@@ -40,17 +41,11 @@ def preprocess(dataset, tables, use_evidence):
         prompt += "[/SCHEMA]"
         prompt += f"[QUESTION] {sample['question']} [/QUESTION]"
 
-        '''
-                prompt += """Given the above [SCHEMA] of a database and a question [QUESTION], translate the question into a valid SQLite statement.
-            The final SQL statement should be enclosed between [SQL] and [/SQL]. Consider that the content you put between [SQL] and [/SQL] has to be the input of DBMS, so 
-            don't explain your queries, don't use comments, and don't put any additional information that is not useful for query execution. In addition, before you write the final
-            SQL query, explain in detail step by step how you would solve the problem, just as a human would do."""
-        '''
-
         prompt += SYSTEM_PROMPT
         response = sample["SQL"]
-        formatted_data.append({"problem": prompt, "answer": response, "db_id": db_id})
+        formatted_data.append({"question_evidence":sample['question']+sample['evidence'],  "problem": prompt, "answer": response, "db_id": db_id})
     dataset = Dataset.from_list(formatted_data)
+
     if use_evidence:
         dataset.save_to_disk("./sql_dataset_evidence")
     else:
@@ -68,14 +63,14 @@ def concatenate_sql_datasets():
 
 
 
-def generate_ddl_from_json(json_path, target_db_id):
+def generate_ddl_from_json(json_path=TABLES_PATH, target_db_id=1):
 
     with open(json_path, 'r') as f:
         databases = json.load(f)
     
     db_data = next((db for db in databases if db['db_id'] == target_db_id), None)
     if not db_data:
-        return f"Error: Database '{target_db_id}' not found"
+        return f"[Error]: Database '{target_db_id}' not found."
     
     table_names_original = db_data['table_names_original'] 
     column_names_original = db_data['column_names_original']
@@ -140,12 +135,5 @@ def generate_ddl_from_json(json_path, target_db_id):
 
 
 
-
-
-
-
 if __name__ == "__main__":
     preprocess(DATASET_PATH, TABLES_PATH, True)
-    preprocess(DATASET_PATH, TABLES_PATH, False)
-    combined_dataset = concatenate_sql_datasets()
-    print(f"Total samples in combined dataset: {len(combined_dataset)}")
