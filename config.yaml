@@ -14,11 +14,11 @@ inference:
   model_name: "ibm-granite/granite-3.1-2b-instruct"
   model_name_validator: "gemini-2.0-flash-lite"
   decoding_strategy: "random_sampling"
-  test_time_strategy: "best_of_n_self_correcting"
+  test_time_strategy: "best_of_n_llm_judge"
   n: 2
   max_iterations: 2
   test_query: "What is the name of the person with the highest salary?"
-  num_queries: "ALL"
+  num_queries: 1
   device: "cuda"
   
 finetuning:

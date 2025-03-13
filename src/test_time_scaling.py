@@ -59,14 +59,14 @@ def test_time_scaling(sql_predictions, db_id, count_gemini_api, question_evidenc
 
     match strategy.lower():
         case "none":
-            return sql_predictions[0]
+            return sql_predictions[0], count_gemini_api
         
 
 
         case "best_of_n":
             scores = [execute_query(sql, db_id)["score"] for sql in sql_predictions]
             final_sql, max_score = max(zip(sql_predictions, scores), key=lambda x: x[1])
-            return final_sql
+            return final_sql, count_gemini_api
         
 
 
@@ -86,17 +86,17 @@ def test_time_scaling(sql_predictions, db_id, count_gemini_api, question_evidenc
                     successful_sqls.append((sql, hashable_rows))
             
             if not successful_sqls:
-                return sql_predictions[0]
+                return sql_predictions[0], count_gemini_api
             
             rows_counts = Counter(pair[1] for pair in successful_sqls)
             if not rows_counts:
-                return sql_predictions[0]
+                return sql_predictions[0], count_gemini_api
                 
             most_common_rows = rows_counts.most_common(1)[0][0]
             for sql, row in successful_sqls:
                 if row == most_common_rows:
-                    return sql
-            return successful_sqls[0][0]
+                    return sql, count_gemini_api
+            return successful_sqls[0][0], count_gemini_api
 
 
 
@@ -108,13 +108,21 @@ def test_time_scaling(sql_predictions, db_id, count_gemini_api, question_evidenc
             if all(score == 0 for score in scores):
                 print(f"None of the queries were successful. Picking one random.")
                 random_result = random.choice(results)
-                return random_result['query']
+                return random_result['query'], count_gemini_api
+            elif all(score == 0.5 for score in scores):
+                print(f"All queries were valid but returned 0 rows. Picking that one.")
+                random_result = random.choice(results)
+                return random_result['query'], count_gemini_api
+            elif scores.count(0.5) == 1 and scores.count(1) == 0:
+                print(f"One query was valid but returned 0 rows. Picking that one.")
+                candidate = next(result for result in results if result['score'] == 0.5)
+                return candidate['query'], count_gemini_api
             elif scores.count(1) == 1:
                 print(f"One query was successful. Picking that one.")
                 candidate = next(result for result in results if result['score'] == 1)
-                return candidate['query']
+                return candidate['query'], count_gemini_api
             elif scores.count(1) > 1:
-                print(f"More query was successful. LLM is judging what is the best one.")
+                print(f"More queries were successful. LLM is judging which is the best one.")
                 candidates = [result['query'] for result in results if result['score'] == 1]
 
                 queryText = ""
@@ -136,9 +144,6 @@ Your job is to:
 
 Final result: [CHOICE]2[/CHOICE].
 
-
-
-
 Here are the details:
 
 **SQL Queries:**
@@ -159,7 +164,7 @@ Here are the details:
                 else:
                     print("No choice found")
 
-                return candidates[match-1]
+                return candidates[match-1], count_gemini_api
 
 
 
