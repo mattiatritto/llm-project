@@ -366,6 +366,8 @@ def generate_gemini(count_gemini_api, prompt=""):
         'AIzaSyAfsCfuno7TtcaWGQvMraweCfuQYj4tIZs',
         'AIzaSyCGAZXGZbReh3hu_baMCz9Cdc1EKHI6TBg',
         'AIzaSyBBoMpaJZMPSEpgTLIpUaaxpvOXV2QoFxE',
+        'AIzaSyALfTIyT7NAimKNlymA3YKZrm1z3zPMSLk',
+        'AIzaSyCZyUAKrm3dfW29iyHujrOEGgRLi4UBy1o',
     ]
 
     current_api_key = api_keys[count_gemini_api % len(api_keys)]
